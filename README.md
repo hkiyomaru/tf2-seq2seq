@@ -6,10 +6,10 @@ This project is partly derived from [an original tutorial](https://www.tensorflo
 
 - OS: Ubuntu 16.04
 - Architecture: x86_64
-- Cuda: 10.0, V10.0.130
+- CUDA: 10.0, V10.0.130
 - cuDNN: 7.6.0
-- Python 3.6.5
-- tensorflow-gpu 2.0.0b
+- Python: 3.6.5
+- tensorflow-gpu: 2.0.0b
 - tqdm
 
 ## Run
