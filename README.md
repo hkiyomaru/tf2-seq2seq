@@ -4,8 +4,13 @@ This project is partly derived from [an original tutorial](https://www.tensorflo
 
 ## Development Environment
 
+- OS: Ubuntu 16.04
+- Architecture: x86_64
+- Cuda: 10.0, V10.0.130
+- cuDNN: 7.6.0
 - Python 3.6.5
-- tensorflow-gpu 2.0.0 (beta)
+- tensorflow-gpu 2.0.0b
+- tqdm
 
 ## Run
 
@@ -13,4 +18,16 @@ This project is partly derived from [an original tutorial](https://www.tensorflo
 
 ```
 $ python prepare_dataset.py ./dataset
+```
+
+2. Create a training configuration file.
+
+```
+$ python configure.py ./dataset ./config  # you will get ./config/config.json
+```
+
+3. Run the training script.
+
+```
+$ python train.py -c ./config/config.json -d <GPUID>
 ```
