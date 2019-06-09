@@ -1,5 +1,6 @@
 """Prepare dataset."""
 import argparse
+import datetime
 import json
 import os
 
@@ -59,6 +60,8 @@ def main():
             'buffer_size': args.buffersize
         }
     }
+
+    print(f'[{datetime.datetime.now()}] Writing a configuration file...')
     os.makedirs(args.BUILD_PATH, exist_ok=True)
     with open(os.path.join(args.BUILD_PATH, 'config.json'), 'w') as f:
         json.dump(config, f, indent=4)
