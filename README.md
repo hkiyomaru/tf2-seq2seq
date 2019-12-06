@@ -1,33 +1,27 @@
-# Sequence-to-sequence by Tensorflow 2.0 Beta
+# Sequence-to-sequence using Tensorflow 2
 
-This project is partly derived from [an original tutorial](https://www.tensorflow.org/beta/tutorials/text/nmt_with_attention).
+This project is partly derived from [an official tutorial](https://www.tensorflow.org/beta/tutorials/text/nmt_with_attention).
 
-## Development Environment
+## Installation
 
-- OS: Ubuntu 16.04
-- Architecture: x86_64
-- CUDA: 10.0, V10.0.130
-- cuDNN: 7.6.0
-- Python: 3.6.5
-- tensorflow-gpu: 2.0.0b
-- tqdm
+Please follow [the official guide](https://www.tensorflow.org/install) to install Tensorflow.
+In addition, you need to install scikit-learn.
 
-## Run
+## Getting Started
 
-1. Prepare the dataset, which is a English-Spanish parallel corpus.
+### Dataset preparation
+
+`prepare_dataset.py` downloads a parallel corpus with some preprocessing.
+The resultant files will consume about 8.1MB.
 
 ```
 $ python prepare_dataset.py ./dataset
 ```
 
-2. Create a training configuration file.
+### Training a seq2seq model
+
+`train.py` starts training a seq2seq model.
 
 ```
-$ python configure.py ./dataset ./config  # you will get ./config/config.json
-```
-
-3. Run the training script.
-
-```
-$ python train.py -c ./config/config.json -d <GPUID>
+$ python train.py --dataset ./dataset --device 0
 ```
