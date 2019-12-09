@@ -9,7 +9,7 @@ In addition, you need to install [scikit-learn](https://scikit-learn.org/stable/
 
 ## Getting Started
 
-### Dataset Preparation
+### Preparing a Dataset
 
 `prepare_dataset.py` downloads a parallel corpus with some preprocessing.
 The resultant files will consume about 8.1MB.
