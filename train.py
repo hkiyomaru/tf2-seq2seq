@@ -142,6 +142,8 @@ def main():
                         help='the number of instances that will be buffered when shuffling the dataset')
     parser.add_argument('--device', default=-1, type=int,
                         help='the device ID to use')
+    parser.add_argument('--checkpoint', default='./checkpoints', type=str,
+                        help='path to checkpoints')
     args = parser.parse_args()
 
     gpus = tf.config.experimental.list_physical_devices('GPU')
@@ -198,6 +200,10 @@ def main():
         mask = tf.cast(mask, dtype=loss_.dtype)
         return tf.reduce_mean(loss_ * mask)
 
+    # set up the saver
+    checkpoint_prefix = os.path.join(args.checkpoint, "ckpt")
+    checkpoint = tf.train.Checkpoint(optimizer=optimizer, encoder=encoder, decoder=decoder)
+
     @tf.function
     def train_step(src: tf.Tensor, tgt: tf.Tensor):
         _, tgt_length = tgt.shape
@@ -238,6 +244,9 @@ def main():
 
             if batch % 100 == 0:
                 print(f'[{datetime.datetime.now()}] Epoch {epoch + 1} Batch {batch} Loss {batch_loss.numpy():.4f}')
+
+        # saving (checkpoint) the model
+        checkpoint.save(file_prefix=checkpoint_prefix)
 
         print(f'[{datetime.datetime.now()}] Epoch {epoch + 1} Loss {total_loss:.4f}')
 
