@@ -12,6 +12,7 @@ CONST = {
     'END': 2,
     'UNK': 3,
 }
+MAX_LENGTH = 40
 
 
 class Encoder(tf.keras.Model):
@@ -121,9 +122,8 @@ def get_dataset(src_path: str, table: tf.lookup.StaticHashTable) -> tf.data.Data
     return dataset
 
 
-def count_max_token_length(path: str) -> int:
-    with open(path) as f:
-        return max(len(line.strip().split(' ')) for line in f)
+def filter_instance_by_max_length(src: tf.Tensor, tgt: tf.Tensor) -> tf.Tensor:
+    return tf.logical_and(tf.size(src) <= MAX_LENGTH, tf.size(tgt) <= MAX_LENGTH)
 
 
 def main():
@@ -160,27 +160,26 @@ def main():
     src_train = get_dataset(os.path.join(args.dataset, 'src_train.txt'), src_table)
     tgt_train = get_dataset(os.path.join(args.dataset, 'tgt_train.txt'), tgt_table)
     train_dataset = tf.data.Dataset.zip((src_train, tgt_train))
+    train_dataset = train_dataset.filter(filter_instance_by_max_length)
+    train_dataset = train_dataset.cache()
     train_dataset = train_dataset.shuffle(args.shuffle_buffer_size)
     train_dataset = train_dataset.padded_batch(
         args.batch_size,
-        padded_shapes=(
-            [count_max_token_length(os.path.join(args.dataset, 'src_train.txt')) + 2],  # START + END
-            [count_max_token_length(os.path.join(args.dataset, 'tgt_train.txt')) + 2],  # START + END
-        ),
+        padded_shapes=([MAX_LENGTH + 2], [MAX_LENGTH + 2]),
         padding_values=(CONST['PAD'], CONST['PAD']),
         drop_remainder=True,
     )
-    train_dataset = train_dataset.prefetch(2)
+    train_dataset = train_dataset.prefetch(tf.data.experimental.AUTOTUNE)
 
     # create a model
     print(f'[{datetime.datetime.now()}] Creating a seq2seq model...')
     encoder = Encoder(
-        src_table.size().numpy() + 4,  # 4 is for PAD, START, END, and UNK
+        src_table.size().numpy() + len(CONST),
         args.embedding_dim,
         args.hidden_dim
     )
     decoder = Decoder(
-        tgt_table.size().numpy() + 4,  # 4 is for PAD, START, END, and UNK
+        tgt_table.size().numpy() + len(CONST),
         args.embedding_dim,
         args.hidden_dim
     )
