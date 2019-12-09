@@ -138,7 +138,17 @@ def main():
                         help='dimension of the hidden representations')
     parser.add_argument('--shuffle-buffer-size', default=4096, type=int,
                         help='the number of instances that will be buffered when shuffling the dataset')
+    parser.add_argument('--device', default=-1, type=int,
+                        help='the device ID to use')
     args = parser.parse_args()
+
+    gpus = tf.config.experimental.list_physical_devices('GPU')
+    if 0 <= args.device and 0 < len(gpus):
+        # Restrict TensorFlow to only use the specified GPU
+        tf.config.experimental.set_visible_devices(gpus[args.device], 'GPU')
+        logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+        print(f'[{datetime.datetime.now()}] {len(gpus)} physical GPUs')
+        print(f'[{datetime.datetime.now()}] {len(logical_gpus)} logical GPUs')
 
     print(f'[{datetime.datetime.now()}] Loading the vocabulary...')
     src_table = get_index_table_from_file(os.path.join(args.dataset, 'src_vocab.txt'))
