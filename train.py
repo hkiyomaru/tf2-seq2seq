@@ -6,10 +6,12 @@ import typing
 import tensorflow as tf
 
 # constant values
-PAD = 0
-START = 1
-END = 2
-UNK = 3
+CONST = {
+    'PAD': 0,
+    'START': 1,
+    'END': 2,
+    'UNK': 3,
+}
 
 
 class Encoder(tf.keras.Model):
@@ -97,7 +99,7 @@ def get_index_table_from_file(path: str) -> tf.lookup.StaticHashTable:
             tf.int64,
             tf.lookup.TextFileIndex.LINE_NUMBER
         ),
-        UNK - 4
+        CONST['UNK'] - len(CONST)
     )
     return table
 
@@ -106,11 +108,11 @@ def get_dataset(src_path: str, table: tf.lookup.StaticHashTable) -> tf.data.Data
 
     def to_ids(text):
         tokenized = tf.strings.split(tf.reshape(text, [1]), sep=' ')
-        ids = table.lookup(tokenized.values) + 4  # 4 is for PAD, START, END, and UNK
+        ids = table.lookup(tokenized.values) + len(CONST)
         return ids
 
     def add_start_end_tokens(tokens):
-        ids = tf.concat([[START], tf.cast(tokens, tf.int32), [END]], axis=0)
+        ids = tf.concat([[CONST['START']], tf.cast(tokens, tf.int32), [CONST['END']]], axis=0)
         return ids
 
     dataset = tf.data.TextLineDataset(src_path)
@@ -165,7 +167,7 @@ def main():
             [count_max_token_length(os.path.join(args.dataset, 'src_train.txt')) + 2],  # START + END
             [count_max_token_length(os.path.join(args.dataset, 'tgt_train.txt')) + 2],  # START + END
         ),
-        padding_values=(PAD, PAD),
+        padding_values=(CONST['PAD'], CONST['PAD']),
         drop_remainder=True,
     )
     train_dataset = train_dataset.prefetch(2)
@@ -193,7 +195,7 @@ def main():
 
     def loss_function(real: tf.Tensor, pred: tf.Tensor) -> tf.Tensor:
         loss_ = loss_object(real, pred)
-        mask = tf.math.logical_not(tf.math.equal(real, PAD))
+        mask = tf.math.logical_not(tf.math.equal(real, CONST['PAD']))
         mask = tf.cast(mask, dtype=loss_.dtype)
         return tf.reduce_mean(loss_ * mask)
 
